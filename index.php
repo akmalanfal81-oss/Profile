@@ -94,12 +94,24 @@
 
 <div class="content" id="log">
   <h2>Riwayat Log Pembelian</h2>
-  <div class="box">Tidak ada riwayat Log Pembelian</div>
+  <div style="margin-bottom: 20px;">
+    <button class="action-btn" id="simulasiBeli">Simulasi Beli Barang</button>
+  </div>
+  <div class="box" id="logListContainer" style="display:block; text-align:left;">
+    <p id="emptyLogText" style="text-align:center;">Tidak ada riwayat Log Pembelian</p>
+    <ul id="logList" style="list-style:none; padding:0; display:none;"></ul>
+  </div>
 </div>
 
 <div class="content" id="barang">
   <h2>Riwayat Barang Jualan</h2>
-  <div class="box">Tidak ada riwayat Barang Jualan</div>
+  <div style="margin-bottom: 20px;">
+    <button class="action-btn" id="tambahBarang">Tambah Barang Baru</button>
+  </div>
+  <div class="box" id="barangListContainer" style="display:block; text-align:left;">
+    <p id="emptyBarangText" style="text-align:center;">Tidak ada riwayat Barang Jualan</p>
+    <ul id="barangList" style="list-style:none; padding:0; display:none;"></ul>
+  </div>
 </div>
 
 <footer></footer>
@@ -165,6 +177,83 @@
       contents.forEach(c => c.style.display = 'none');
       document.getElementById(tab.dataset.tab).style.display = 'flex';
     });
+  });
+
+  // --- LOGIKA NOTIFIKASI SEMENTARA (SESSION BASED) ---
+
+  const simulasiBeliBtn = document.getElementById('simulasiBeli');
+  const tambahBarangBtn = document.getElementById('tambahBarang');
+  
+  // Container
+  const notifBox = document.querySelector('#notif .box');
+  const logList = document.getElementById('logList');
+  const barangList = document.getElementById('barangList');
+
+  // Helper: Mendapatkan Jam Sekarang
+  function getTime() {
+    const now = new Date();
+    return now.toLocaleTimeString('id-ID');
+  }
+
+  // FUNGSI UTAMA: Menambah Notifikasi
+  function addNotification(message) {
+    // 1. Cek jika box masih kosong (text default)
+    if (notifBox.innerText.includes('Tidak ada riwayat')) {
+      notifBox.innerHTML = ''; // Kosongkan text default
+      notifBox.style.display = 'block'; // Ubah dari flex ke block agar list turun ke bawah
+      notifBox.style.textAlign = 'left';
+    }
+
+    // 2. Buat elemen notifikasi baru
+    const div = document.createElement('div');
+    div.className = 'notif-item';
+    div.innerHTML = `
+      <div>${message}</div>
+      <div class="timestamp">${getTime()}</div>
+    `;
+
+    // 3. Masukkan ke paling atas (prepend)
+    notifBox.prepend(div);
+    
+    // Optional: Auto switch ke tab notifikasi biar user sadar (bisa dihapus jika mengganggu)
+    // document.querySelector('.tab[data-tab="notif"]').click(); 
+  }
+
+  // FUNGSI: Simulasi Beli Barang (Log Pembelian)
+  simulasiBeliBtn.addEventListener('click', () => {
+    const items = ['Martabak Manis', 'Terang Bulan Keju', 'Martabak Telur', 'Soda Gembira'];
+    const randomItem = items[Math.floor(Math.random() * items.length)];
+    
+    // UI Update di Tab Log
+    document.getElementById('emptyLogText').style.display = 'none';
+    logList.style.display = 'block';
+    
+    const li = document.createElement('li');
+    li.className = 'list-item';
+    li.innerHTML = `<span>Membeli <b>${randomItem}</b></span> <span class="timestamp">${getTime()}</span>`;
+    logList.prepend(li);
+
+    // TRIGGER NOTIFIKASI
+    addNotification(`Pembelian berhasil: Kamu baru saja membeli <b>${randomItem}</b>.`);
+    alert('Barang berhasil dibeli! Cek tab Notifikasi.');
+  });
+
+  // FUNGSI: Simulasi Tambah Barang (Barang Jualan)
+  tambahBarangBtn.addEventListener('click', () => {
+    const barangBaru = 'Menu Spesial ' + Math.floor(Math.random() * 100);
+    
+    // UI Update di Tab Barang
+    document.getElementById('emptyBarangText').style.display = 'none';
+    barangList.style.display = 'block';
+
+    const li = document.createElement('li');
+    li.className = 'list-item';
+    li.innerHTML = `<span>Menambahkan <b>${barangBaru}</b></span> <span class="timestamp">${getTime()}</span>`;
+    barangList.prepend(li);
+
+    // TRIGGER NOTIFIKASI
+    addNotification(`Update Stok: Kamu berhasil menambahkan <b>${barangBaru}</b> ke etalase.`);
+    alert('Barang berhasil ditambah! Cek tab Notifikasi.');
   });
 </script>
 
